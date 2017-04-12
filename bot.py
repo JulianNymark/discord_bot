@@ -84,16 +84,16 @@ async def choose(*choices : str):
     """Chooses between multiple choices."""
     await bot.say(random.choice(choices))
 
-@bot.command()
-async def repeat(times : int, content='repeating...'):
-    """Repeats a message multiple times."""
-    for i in range(times):
-        await bot.say(content)
+# @bot.command()
+# async def repeat(times : int, content='repeating...'):
+#     """Repeats a message multiple times."""
+#     for i in range(times):
+#         await bot.say(content)
 
 @bot.command()
 async def joined(member : discord.Member):
     """Says when a member joined."""
-    await bot.say('{0.name} joined in {0.joined_at}'.format(member))
+    await bot.say('{0.name} joined in {0.joined_at} :poop:'.format(member))
 
 @bot.group(pass_context=True)
 async def cool(ctx):
