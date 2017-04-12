@@ -14,6 +14,10 @@ channel_list = []
 def random_channel():
     return random.choice(channel_list)
 
+def update_channels():
+    global channel_list
+    channel_list = list(bot.get_all_channels())
+
 def setup():
     global channel_list
     channel_list = list(bot.get_all_channels())
@@ -41,15 +45,22 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_member_update(before, after):
-    await bot.send_message(random_channel(), after.nick + ' you smell different! that\'s nice!')
+    print("before", before)
+    print('after', after)
+    #await bot.send_message(random_channel(), '{} you smell different! that\'s nice!'.format(after))
 
 @bot.event
 async def on_channel_create(channel):
     await bot.send_message(channel, 'NEW CHANNEL NEW CHANNEL NEW CHANNEL!')
+    await bot.send_message(channel, 'dis ma litterbox!!! :poop: :poop:')
+    await bot.send_message(channel, ':poop:')
+    await bot.send_message(channel, ':poop:')
+    update_channels()
 
 @bot.event
 async def on_channel_delete(channel):
     await bot.send_message(random_channel(), 'RIP, '+ channel.name + '. That channel was a piece of shit!')
+    update_channels()
 
 @bot.command()
 async def add(left : int, right : int):
@@ -98,4 +109,5 @@ async def _bot():
     """Is the bot cool?"""
     await bot.say('Yes, the bot is cool.')
 
-bot.run(os.environ['DISCORD_SECRET_TOKEN'])
+token = os.environ['DISCORD_SECRET_TOKEN']
+bot.run(token)
