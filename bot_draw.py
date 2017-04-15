@@ -69,7 +69,7 @@ threading.Thread(target=discorderino).start()
 app = Flask(__name__)
 hash = sha512_crypt.hash(os.environ['DISCORD_UPLOAD_PASSWORD'])
 
-@app.route('/draw', methods=['POST'])
+@app.route('/draws', methods=['POST'])
 def draw():
     try:
         file = request.files['file']
