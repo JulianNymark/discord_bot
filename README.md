@@ -1,4 +1,4 @@
-# just add a makefile for the enviroment variable!
+# just add a makefile for the environment variable!
 ```makefile
 export DISCORD_SECRET_TOKEN=123EXAMPLETOKEN123
 
