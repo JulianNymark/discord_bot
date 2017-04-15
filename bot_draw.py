@@ -3,8 +3,9 @@ import asyncio
 import os
 import logging
 import threading
+import shutil
 
-from flask import Flask
+from flask import Flask, request
 
 # logging.basicConfig(level=logging.DEBUG,
 #                     format='(%(threadName)-10s) %(message)s'
@@ -12,6 +13,7 @@ from flask import Flask
 
 meme_queue = []
 meme_lock = threading.Condition()
+meme_directory = './temp'
 
 ###########################
 # DISCORDERINO
@@ -40,7 +42,8 @@ async def my_background_task():
         meme_lock.acquire()
         meme_lock.wait()
         meme = meme_queue.pop()
-        await client.send_message(channel_by_name('memes'), meme)
+        with open(meme_directory + '/' + meme.filename, 'rb') as f:
+            await client.send_file(channel_by_name('draws'), f)
         meme_lock.release()
 
 @client.event
@@ -49,6 +52,7 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    update_channels()
 
 def discorderino():
     client.loop.create_task(my_background_task())
@@ -64,11 +68,27 @@ app = Flask(__name__)
 
 @app.route("/draw", methods=['POST'])
 def draw():
-    meme_lock.acquire()
-    # receive body = image data -> client.send_image()
-    meme_queue.append('a meme')
-    meme_lock.notify()
-    meme_lock.release()
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    file = request.files['file']
+    # if user does not select file, browser also
+    # submit a empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
+    if file:
+        shutil.rmtree(meme_directory)
+        os.mkdir(meme_directory)
+
+        file.save(os.path.join(meme_directory, file.filename))
+
+        meme_lock.acquire()
+        meme_queue.append(file)
+        meme_lock.notify()
+        meme_lock.release()
+        return "{ success : success }"
     return "{ success : failure }"
 
 def flaskerino():
