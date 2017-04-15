@@ -11,6 +11,7 @@ from flask import Flask
 # )
 
 meme_queue = []
+meme_lock = threading.Condition()
 
 ###########################
 # DISCORDERINO
@@ -36,11 +37,11 @@ def channel_by_name(name):
 async def my_background_task():
     await client.wait_until_ready()
     while not client.is_closed:
-        if not meme_queue:
-            await asyncio.sleep(0.5)
-        else:
-            meme = meme_queue.pop()
-            await client.send_message(channel_by_name('memes'), meme)
+        meme_lock.acquire()
+        meme_lock.wait()
+        meme = meme_queue.pop()
+        await client.send_message(channel_by_name('memes'), meme)
+        meme_lock.release()
 
 @client.event
 async def on_ready():
@@ -63,8 +64,11 @@ app = Flask(__name__)
 
 @app.route("/draw", methods=['POST'])
 def draw():
+    meme_lock.acquire()
     # receive body = image data -> client.send_image()
     meme_queue.append('a meme')
+    meme_lock.notify()
+    meme_lock.release()
     return "{ success : failure }"
 
 def flaskerino():
