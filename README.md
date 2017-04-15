@@ -8,3 +8,11 @@ all:
 i:
 	python3.5 -i bot_draw.py
 ```
+
+# dependencies
+
+```sh
+sudo python3.5 -m pip install -U discord.py
+sudo python3.5 -m pip install -U passlib
+sudo python3.5 -m pip install -U flask
+```
