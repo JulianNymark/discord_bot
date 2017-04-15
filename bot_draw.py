@@ -6,7 +6,7 @@ import threading
 import shutil
 
 from flask import Flask, request
-from itsdangerous import Signer
+from passlib.hash import sha512_crypt
 
 # logging.basicConfig(level=logging.DEBUG,
 #                     format='(%(threadName)-10s) %(message)s'
@@ -45,6 +45,7 @@ async def my_background_task():
         meme = meme_queue.pop()
         with open(meme_directory + '/' + meme.filename, 'rb') as f:
             await client.send_file(channel_by_name('draws'), f)
+        shutil.rmtree(meme_directory, ignore_errors=True)
         meme_lock.release()
 
 @client.event
@@ -66,13 +67,26 @@ threading.Thread(target=discorderino).start()
 ###########################
 
 app = Flask(__name__)
+hash = sha512_crypt.hash(os.environ['DISCORD_UPLOAD_PASSWORD'])
 
-@app.route("/draw", methods=['POST'])
+@app.route('/draw', methods=['POST'])
 def draw():
-    file = request.files['file']
+    try:
+        file = request.files['file']
+    except:
+        return '{ success : failure }'
+
+    try:
+        password = request.form['password']
+    except:
+        return '{ success : failure }'
+
+    if not sha512_crypt.verify(password, hash):
+        return '{ success : failure }'
+
     if file:
-        shutil.rmtree(meme_directory)
-        os.mkdir(meme_directory)
+        if not os.path.exists(meme_directory):
+            os.mkdir(meme_directory)
 
         file.save(os.path.join(meme_directory, file.filename))
 
@@ -80,18 +94,14 @@ def draw():
         meme_queue.append(file)
         meme_lock.notify()
         meme_lock.release()
-        return "{ success : success }"
-    return "{ success : failure }"
+        return '{ success : success }'
+    return '{ success : failure }'
 
 def flaskerino():
-    if __name__ == "__main__":
+    if __name__ == '__main__':
         app.run()
 
 
 threading.Thread(target=flaskerino).start()
 
-
-########################
-
-s = Signer('secret-key')
-s.sign('my string')
+# :poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop::poop:
