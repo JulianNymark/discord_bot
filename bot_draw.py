@@ -44,8 +44,7 @@ async def my_background_task():
         meme_lock.wait()
         meme = meme_queue.pop()
         with open(meme_directory + '/' + meme.filename, 'rb') as f:
-            await client.send_file(channel_by_name('draws'), f)
-        shutil.rmtree(meme_directory, ignore_errors=True)
+            await client.send_file(channel_by_name('memes'), f)
         meme_lock.release()
 
 @client.event
@@ -85,6 +84,7 @@ def draw():
         return '{ success : failure }'
 
     if file:
+        shutil.rmtree(meme_directory, ignore_errors=True)
         if not os.path.exists(meme_directory):
             os.mkdir(meme_directory)
 
