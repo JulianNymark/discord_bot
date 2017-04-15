@@ -6,6 +6,7 @@ import threading
 import shutil
 
 from flask import Flask, request
+from itsdangerous import Signer
 
 # logging.basicConfig(level=logging.DEBUG,
 #                     format='(%(threadName)-10s) %(message)s'
@@ -68,16 +69,7 @@ app = Flask(__name__)
 
 @app.route("/draw", methods=['POST'])
 def draw():
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
     file = request.files['file']
-    # if user does not select file, browser also
-    # submit a empty part without filename
-    if file.filename == '':
-        flash('No selected file')
-        return redirect(request.url)
     if file:
         shutil.rmtree(meme_directory)
         os.mkdir(meme_directory)
@@ -97,3 +89,9 @@ def flaskerino():
 
 
 threading.Thread(target=flaskerino).start()
+
+
+########################
+
+s = Signer('secret-key')
+s.sign('my string')
