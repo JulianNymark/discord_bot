@@ -3,7 +3,6 @@ import asyncio
 import os
 import logging
 import threading
-import shutil
 
 from flask import Flask, request
 from passlib.hash import sha512_crypt
@@ -47,8 +46,13 @@ async def my_background_task():
         with open(meme_directory + '/' + meme.filename, 'rb') as f:
             await client.send_file(channel_by_name('memes'), f)
         meme_lock.release()
-        print('removing', meme_directory)
-        shutil.rmtree(meme_directory, ignore_errors=True)
+        print('removing', meme_directory + '/' + meme.filename)
+        os.remove(meme_directory + '/' + meme.filename)
+        for dirpath, dirnames, files in os.walk(meme_directory):
+            if not files:
+                print('removing', meme_directory, ' (EMPTY)')
+                os.rmdir(meme_directory)
+
 
 @client.event
 async def on_ready():
