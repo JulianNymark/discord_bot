@@ -43,9 +43,12 @@ async def my_background_task():
         meme_lock.acquire()
         meme_lock.wait()
         meme = meme_queue.pop()
+        print('sending... ', meme.filename)
         with open(meme_directory + '/' + meme.filename, 'rb') as f:
             await client.send_file(channel_by_name('memes'), f)
         meme_lock.release()
+        print('removing', meme_directory)
+        shutil.rmtree(meme_directory, ignore_errors=True)
 
 @client.event
 async def on_ready():
@@ -84,10 +87,11 @@ def draw():
         return '{ success : failure }'
 
     if file:
-        shutil.rmtree(meme_directory, ignore_errors=True)
         if not os.path.exists(meme_directory):
+            print('creating', meme_directory)
             os.mkdir(meme_directory)
 
+        print('saving file... ', file.filename)
         file.save(os.path.join(meme_directory, file.filename))
 
         meme_lock.acquire()
